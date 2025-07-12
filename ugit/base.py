@@ -36,6 +36,7 @@ def _iter_tree_entries(oid):
 def get_tree(oid, base_path=''):
     result = {}
     for type_, oid, name in _iter_tree_entries (oid):
+        print(f'{type_} {oid} {name}')
         assert '/' not in name
         assert name not in ('..', '.')
         path = base_path + name
@@ -47,12 +48,28 @@ def get_tree(oid, base_path=''):
             assert False, f'Unknown type: {type_}'
     return result
 
+def _empty_current_directory ():
+    for root, dirnames, filenames in os.walk('.', topdown=False):
+        for filename in filenames:
+            path = os.path.relpath(f'{root}/{filename}')
+            if is_ignored(path) or not os.path.isfile(path):
+                continue
+            os.remove(path)
+        for dirname in dirnames:
+            path = os.path.relpath(f'{root}/{dirname}')
+            if is_ignored(path):
+                continue
+            try:
+                os.rmdir(path)
+            except (FileNotFoundError, OSError):
+                # delete might fail if the directory contains ignored files so its ok
+                pass
+
 def read_tree(tree_oid):
+    _empty_current_directory()
     for path, oid in get_tree(tree_oid, base_path='./').items():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, 'wb') as f:
-            print("writing to file\n")
-            print(path)
             f.write(data.get_object(oid))
 
 def is_ignored (path):

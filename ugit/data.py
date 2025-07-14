@@ -17,7 +17,7 @@ def update_ref (ref, oid):
     with open(ref_path, 'w') as f:
         f.write (oid)
 
-def get_ref (ref):
+def get_ref(ref):
     ref_path = f'{GIT_DIR}/{ref}'
     if os.path.isfile(ref_path):
         with open(ref_path) as f:

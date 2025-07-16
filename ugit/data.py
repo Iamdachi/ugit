@@ -11,7 +11,7 @@ def init ():
     os.makedirs(os.path.join(GIT_DIR, "objects"))
 
 
-def update_ref (ref, oid):
+def update_ref(ref, oid):
     ref_path = f'{GIT_DIR}/{ref}'
     os.makedirs(os.path.dirname(ref_path), exist_ok=True)
     with open(ref_path, 'w') as f:
@@ -23,6 +23,14 @@ def get_ref(ref):
         with open(ref_path) as f:
             return f.read().strip()
 
+def iter_refs ():
+    refs = ['HEAD']
+    for root, _, filenames in os.walk(f'{GIT_DIR}/refs/'):
+        root = os.path.relpath(root, GIT_DIR)
+        refs.extend(f'{root}/{name}' for name in filenames)
+
+    for refname in refs:
+        yield refname, get_ref(refname)
 
 # data is a content of a file
 def hash_object (data, type_='blob'):

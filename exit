@@ -1,0 +1,54 @@
+[33mcommit 13b0f4919199e86881f3d3b01c8dff195e5a93d9[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Merge: 31971d4 7801742
+Author: dachi <d_zedginidze@cu.edu.ge>
+Date:   Tue Jul 15 01:23:34 2025 +0400
+
+    Merge branch 'main' of github.com:Iamdachi/ugit
+
+[33mcommit 31971d45761040f609b829e5a5040cf7b8c9b048[m
+Author: dachi <d_zedginidze@cu.edu.ge>
+Date:   Tue Jul 15 01:17:47 2025 +0400
+
+    upto - tag: Resolve name to oid in argparse
+
+[33mcommit 6d0f24b65bbcc6f96085f7cc0cf69eb19eb866ec[m
+Author: dachi <d_zedginidze@cu.edu.ge>
+Date:   Tue Jul 15 01:15:10 2025 +0400
+
+    upto - tag: Resolve name to oid in argparse
+
+[33mcommit 780174238ef23f86f502626d0b32e1474a0fec3d[m
+Author: Iamdachi <d_zedginidze@cu.edu.ge>
+Date:   Mon Jul 14 18:24:35 2025 +0400
+
+    Update README.md
+
+[33mcommit 9b8dae803292658086c66785e81116bd124ca1bc[m
+Author: dachi <d_zedginidze@cu.edu.ge>
+Date:   Mon Jul 14 18:19:57 2025 +0400
+
+    up to read tree and move HEAD
+
+[33mcommit 328196f9975c0d0f39769d8223541c71eae36bca[m
+Author: dachi <d_zedginidze@cu.edu.ge>
+Date:   Sat Jul 12 15:51:39 2025 +0400
+
+    up to commits
+
+[33mcommit 21f462f9be2d0abf08fce79fcd5a0362b7d07453[m
+Author: dachi <d_zedginidze@cu.edu.ge>
+Date:   Sat Jul 12 05:41:11 2025 +0400
+
+    hash directory and write them back
+
+[33mcommit 13364ed6e23c84125fca5e413c8dde986300f73e[m
+Author: dachi <d_zedginidze@cu.edu.ge>
+Date:   Thu Jul 10 23:55:16 2025 +0400
+
+    sec commit
+
+[33mcommit ac0a34b82b164d4462cee467893d8475a44a0428[m
+Author: dachi <d_zedginidze@cu.edu.ge>
+Date:   Thu Jul 10 23:53:59 2025 +0400
+
+    first commit

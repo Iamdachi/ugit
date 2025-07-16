@@ -48,7 +48,7 @@ def parse_args ():
 
     checkout_parser = commands.add_parser('checkout')
     checkout_parser.set_defaults(func=checkout)
-    checkout_parser.add_argument('oid', type=oid)
+    checkout_parser.add_argument('commit')
 
     tag_parser = commands.add_parser('tag')
     tag_parser.set_defaults(func=tag)
@@ -57,16 +57,20 @@ def parse_args ():
 
     branch_parser = commands.add_parser('branch')
     branch_parser.set_defaults(func=branch)
-    branch_parser.add_argument('name')
+    branch_parser.add_argument ('name', nargs='?')
     branch_parser.add_argument('start_point', default='@', type=oid, nargs='?')
 
     k_parser = commands.add_parser('k')
     k_parser.set_defaults(func=k)
+
+    status_parser = commands.add_parser('status')
+    status_parser.set_defaults(func=status)
+
     return parser.parse_args ()
 
 
 def init (args):
-    data.init()
+    base.init()
     print(f'Initialized empty ugit repository in {os.getcwd()}/{data.GIT_DIR}')
 
 def hash_object(args):
@@ -95,23 +99,30 @@ def log(args):
         print('')
 
 def checkout(args):
-    base.checkout(args.oid)
+    base.checkout(args.commit)
 
 def tag(args):
     base.create_tag(args.name, args.oid)
 
 def branch(args):
-    base.create_branch(args.name, args.start_point)
-    print (f'Branch {args.name} created at {args.start_point[:10]}')
+    if not args.name:
+        current = base.get_branch_name()
+    for branch in base.iter_branch_names():
+        prefix = '*' if branch == current else ' '
+        print(f'{prefix} {branch}')
+    else:
+        base.create_branch(args.name, args.start_point)
+        print(f'Branch {args.name} created at {args.start_point[:10]}')
 
 def k (args):
     dot = 'digraph commits {\n'
 
     oids = set()
-    for refname, ref in data.iter_refs():
+    for refname, ref in data.iter_refs (deref=False):
         dot += f'"{refname}" [shape=note]\n'
         dot += f'"{refname}" -> "{ref.value}"\n'
-        oids.add(ref.value)
+        if not ref.symbolic:
+            oids.add(ref.value)
 
     for oid in base.iter_commits_and_parents(oids):
         commit = base.get_commit(oid)
@@ -126,4 +137,10 @@ def k (args):
             stdin=subprocess.PIPE) as proc:
         proc.communicate(dot.encode())
 
-
+def status (args):
+    HEAD = base.get_oid ('@')
+    branch = base.get_branch_name ()
+    if branch:
+        print (f'On branch {branch}')
+    else:
+        print (f'HEAD detached at {HEAD[:10]}')

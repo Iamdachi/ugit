@@ -6,6 +6,8 @@ import textwrap
 
 from . import base
 from . import data
+from . import diff
+
 
 def main ():
     args = parse_args ()
@@ -66,6 +68,27 @@ def parse_args ():
     status_parser = commands.add_parser('status')
     status_parser.set_defaults(func=status)
 
+    reset_parser = commands.add_parser('reset')
+    reset_parser.set_defaults(func=reset)
+    reset_parser.add_argument('commit', type=oid)
+
+    show_parser = commands.add_parser('show')
+    show_parser.set_defaults(func=show)
+    show_parser.add_argument('oid', default='@', type=oid, nargs='?')
+
+    diff_parser = commands.add_parser('diff')
+    diff_parser.set_defaults(func=_diff)
+    diff_parser.add_argument('commit', default='@', type=oid, nargs='?')
+
+    merge_parser = commands.add_parser('merge')
+    merge_parser.set_defaults(func=merge)
+    merge_parser.add_argument('commit', type=oid)
+
+    merge_base_parser = commands.add_parser('merge-base')
+    merge_base_parser.set_defaults(func=merge_base)
+    merge_base_parser.add_argument('commit1', type=oid)
+    merge_base_parser.add_argument('commit2', type=oid)
+
     return parser.parse_args ()
 
 
@@ -90,13 +113,42 @@ def read_tree (args):
 def commit (args):
     print (base.commit (args.message))
 
+def _print_commit (oid, commit, refs=None):
+    refs_str = f' ({", ".join (refs)})' if refs else ''
+    print (f'commit {oid}{refs_str}\n')
+    print (textwrap.indent (commit.message, '    '))
+    print ('')
+
 def log(args):
+    refs = {}
+    for refname, ref in data.iter_refs():
+        refs.setdefault(ref.value, []).append(refname)
+
     for oid in base.iter_commits_and_parents ({args.oid}):
         commit = base.get_commit(oid)
+        _print_commit (oid, commit, refs.get (oid))
 
-        print(f'commit {oid}\n')
-        print(textwrap.indent(commit.message, '  '))
-        print('')
+def show (args):
+    if not args.oid:
+        return
+    commit = base.get_commit(args.oid)
+    parent_tree = None
+    if commit.parents:
+        parent_tree = base.get_commit (commit.parents[0]).tree
+
+    _print_commit(args.oid, commit)
+    result = diff.diff_trees(
+        base.get_tree(parent_tree), base.get_tree(commit.tree))
+    sys.stdout.flush ()
+    sys.stdout.buffer.write(result)
+
+
+def _diff (args):
+    tree = args.commit and base.get_commit(args.commit).tree
+
+    result = diff.diff_trees(base.get_tree (tree), base.get_working_tree())
+    sys.stdout.flush()
+    sys.stdout.buffer.write(result)
 
 def checkout(args):
     base.checkout(args.commit)
@@ -127,8 +179,8 @@ def k (args):
     for oid in base.iter_commits_and_parents(oids):
         commit = base.get_commit(oid)
         dot += f'"{oid}" [shape=box style=filled label="{oid[:10]}"]\n'
-        if commit.parent:
-            dot += f'"{oid}" -> "{commit.parent}"\n'
+        for parent in commit.parents:
+            dot += f'"{oid}" -> "{parent}"\n'
     dot += '}'
     print(dot)
     # TODO visualize refs
@@ -144,3 +196,23 @@ def status (args):
         print (f'On branch {branch}')
     else:
         print (f'HEAD detached at {HEAD[:10]}')
+
+    MERGE_HEAD = data.get_ref('MERGE_HEAD').value
+    if MERGE_HEAD:
+        print(f'Merging with {MERGE_HEAD[:10]}')
+
+    print('\nChanges to be committed:\n')
+    HEAD_tree = HEAD and base.get_commit(HEAD).tree
+
+    for path, action in diff.iter_changed_files(base.get_tree(HEAD_tree),
+                                                base.get_working_tree()):
+        print(f'{action:>12}: {path}')
+
+def reset (args):
+    base.reset (args.commit)
+
+def merge (args):
+    base.merge(args.commit)
+
+def merge_base (args):
+    print(base.get_merge_base (args.commit1, args.commit2))

@@ -29,12 +29,12 @@ def update_ref(ref, value, deref=True):
         f.write(value)
 
 #
-def get_ref (ref, deref=True):
-    return _get_ref_internal (ref, deref)[1]
+def get_ref(ref, deref=True):
+    return _get_ref_internal(ref, deref)[1]
 
-def delete_ref (ref, deref=True):
-    ref = _get_ref_internal (ref, deref)[0]
-    os.remove (f'{GIT_DIR}/{ref}')
+def delete_ref(ref, deref=True):
+    ref = _get_ref_internal(ref, deref)[0]
+    os.remove(f'{GIT_DIR}/{ref}')
 
 
 # Given ref name, return oid
@@ -52,7 +52,7 @@ def _get_ref_internal(ref, deref):
         if deref:
             return _get_ref_internal(value, deref=True)
 
-    return ref, RefValue (symbolic=symbolic, value=value)
+    return ref, RefValue(symbolic=symbolic, value=value)
 
 def iter_refs(prefix='', deref=True):
     refs = ['HEAD', 'MERGE_HEAD']
@@ -69,16 +69,16 @@ def iter_refs(prefix='', deref=True):
 
 
 # data is a content of a file
-def hash_object (data, type_='blob'):
+def hash_object(data, type_='blob'):
     obj = type_.encode() + b'\x00' + data
-    oid = hashlib.sha1 (obj).hexdigest ()
-    with open (f'{GIT_DIR}/objects/{oid}', 'wb') as out:
-        out.write (obj)
+    oid = hashlib.sha1(obj).hexdigest()
+    with open(f'{GIT_DIR}/objects/{oid}', 'wb') as out:
+        out.write(obj)
     return oid
 
-def get_object (oid, expected='blob'):
-    with open (f'{GIT_DIR}/objects/{oid}', 'rb') as f:
-        obj = f.read ()
+def get_object(oid, expected='blob'):
+    with open(f'{GIT_DIR}/objects/{oid}', 'rb') as f:
+        obj = f.read()
     type_, _, content = obj.partition(b'\x00')
     type_ = type_.decode()
 

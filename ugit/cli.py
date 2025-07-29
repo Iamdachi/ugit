@@ -9,20 +9,20 @@ from . import data
 from . import diff
 
 
-def main ():
-    args = parse_args ()
-    args.func (args)
+def main():
+    args = parse_args()
+    args.func(args)
 
 
-def parse_args ():
-    parser = argparse.ArgumentParser ()
+def parse_args():
+    parser = argparse.ArgumentParser()
 
-    commands = parser.add_subparsers (dest='command')
+    commands = parser.add_subparsers(dest='command')
     commands.required = True
 
     oid = base.get_oid
 
-    init_parser = commands.add_parser ('init')
+    init_parser = commands.add_parser('init')
     init_parser.set_defaults(func=init)
 
     hash_object_parser = commands.add_parser('hash-object')
@@ -59,7 +59,7 @@ def parse_args ():
 
     branch_parser = commands.add_parser('branch')
     branch_parser.set_defaults(func=branch)
-    branch_parser.add_argument ('name', nargs='?')
+    branch_parser.add_argument('name', nargs='?')
     branch_parser.add_argument('start_point', default='@', type=oid, nargs='?')
 
     k_parser = commands.add_parser('k')
@@ -89,10 +89,10 @@ def parse_args ():
     merge_base_parser.add_argument('commit1', type=oid)
     merge_base_parser.add_argument('commit2', type=oid)
 
-    return parser.parse_args ()
+    return parser.parse_args()
 
 
-def init (args):
+def init(args):
     base.init()
     print(f'Initialized empty ugit repository in {os.getcwd()}/{data.GIT_DIR}')
 
@@ -100,53 +100,53 @@ def hash_object(args):
     with open(args.file, 'rb') as f:
         print(data.hash_object(f.read()))
 
-def cat_file (args):
-    sys.stdout.flush ()
-    sys.stdout.buffer.write (data.get_object (args.object, expected=None))
+def cat_file(args):
+    sys.stdout.flush()
+    sys.stdout.buffer.write(data.get_object(args.object, expected=None))
 
-def write_tree (args):
-    print (base.write_tree ())
+def write_tree(args):
+    print(base.write_tree())
 
-def read_tree (args):
-    base.read_tree (args.tree)
+def read_tree(args):
+    base.read_tree(args.tree)
 
-def commit (args):
-    print (base.commit (args.message))
+def commit(args):
+    print(base.commit(args.message))
 
-def _print_commit (oid, commit, refs=None):
-    refs_str = f' ({", ".join (refs)})' if refs else ''
-    print (f'commit {oid}{refs_str}\n')
-    print (textwrap.indent (commit.message, '    '))
-    print ('')
+def _print_commit(oid, commit, refs=None):
+    refs_str = f'({", ".join(refs)})' if refs else ''
+    print(f'commit {oid}{refs_str}\n')
+    print(textwrap.indent(commit.message, '    '))
+    print('')
 
 def log(args):
     refs = {}
     for refname, ref in data.iter_refs():
         refs.setdefault(ref.value, []).append(refname)
 
-    for oid in base.iter_commits_and_parents ({args.oid}):
+    for oid in base.iter_commits_and_parents({args.oid}):
         commit = base.get_commit(oid)
-        _print_commit (oid, commit, refs.get (oid))
+        _print_commit(oid, commit, refs.get(oid))
 
-def show (args):
+def show(args):
     if not args.oid:
         return
     commit = base.get_commit(args.oid)
     parent_tree = None
     if commit.parents:
-        parent_tree = base.get_commit (commit.parents[0]).tree
+        parent_tree = base.get_commit(commit.parents[0]).tree
 
     _print_commit(args.oid, commit)
     result = diff.diff_trees(
         base.get_tree(parent_tree), base.get_tree(commit.tree))
-    sys.stdout.flush ()
+    sys.stdout.flush()
     sys.stdout.buffer.write(result)
 
 
-def _diff (args):
+def _diff(args):
     tree = args.commit and base.get_commit(args.commit).tree
 
-    result = diff.diff_trees(base.get_tree (tree), base.get_working_tree())
+    result = diff.diff_trees(base.get_tree(tree), base.get_working_tree())
     sys.stdout.flush()
     sys.stdout.buffer.write(result)
 
@@ -166,11 +166,11 @@ def branch(args):
         base.create_branch(args.name, args.start_point)
         print(f'Branch {args.name} created at {args.start_point[:10]}')
 
-def k (args):
+def k(args):
     dot = 'digraph commits {\n'
 
     oids = set()
-    for refname, ref in data.iter_refs (deref=False):
+    for refname, ref in data.iter_refs(deref=False):
         dot += f'"{refname}" [shape=note]\n'
         dot += f'"{refname}" -> "{ref.value}"\n'
         if not ref.symbolic:
@@ -189,13 +189,13 @@ def k (args):
             stdin=subprocess.PIPE) as proc:
         proc.communicate(dot.encode())
 
-def status (args):
-    HEAD = base.get_oid ('@')
-    branch = base.get_branch_name ()
+def status(args):
+    HEAD = base.get_oid('@')
+    branch = base.get_branch_name()
     if branch:
-        print (f'On branch {branch}')
+        print(f'On branch {branch}')
     else:
-        print (f'HEAD detached at {HEAD[:10]}')
+        print(f'HEAD detached at {HEAD[:10]}')
 
     MERGE_HEAD = data.get_ref('MERGE_HEAD').value
     if MERGE_HEAD:
@@ -208,11 +208,11 @@ def status (args):
                                                 base.get_working_tree()):
         print(f'{action:>12}: {path}')
 
-def reset (args):
-    base.reset (args.commit)
+def reset(args):
+    base.reset(args.commit)
 
-def merge (args):
+def merge(args):
     base.merge(args.commit)
 
-def merge_base (args):
-    print(base.get_merge_base (args.commit1, args.commit2))
+def merge_base(args):
+    print(base.get_merge_base(args.commit1, args.commit2))

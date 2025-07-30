@@ -15,9 +15,11 @@ def init():
 
 
 def write_tree(directory='.'):
+    print("in write tree:")
     entries = []
     with os.scandir(directory) as it:
         for entry in it:
+            print(entry)
             full = f'{directory}/{entry.name}'
             if is_ignored(full):
                 continue

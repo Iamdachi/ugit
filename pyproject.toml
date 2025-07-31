@@ -12,3 +12,8 @@ dependencies = []
 
 [project.scripts]
 ugit = "ugit.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]

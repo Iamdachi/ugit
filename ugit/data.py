@@ -5,16 +5,21 @@ from collections import namedtuple
 
 GIT_DIR = '.ugit'
 
-def init ():
+def init():
     if os.path.exists(GIT_DIR):
         print("Error: Repository already exists.")
         return
-    os.makedirs (GIT_DIR)
+    os.makedirs(GIT_DIR)
     os.makedirs(os.path.join(GIT_DIR, "objects"))
 
-RefValue = namedtuple ('RefValue', ['symbolic', 'value'])
+RefValue = namedtuple('RefValue', ['symbolic', 'value'])
 
-def update_ref(ref, value, deref=True):
+'''
+reference ref will literally have a file called {ref} in .ugit dir. write into it a RefValue.value
+symbolic example: update_ref('HEAD', 'refs/heads/master') 
+non-symbolic example: update_ref('HEAD', '123456abc')
+'''
+def update_ref(ref : str, value : RefValue, deref=True):
     ref = _get_ref_internal(ref, deref)[0]
 
     assert value.value
@@ -37,7 +42,7 @@ def delete_ref(ref, deref=True):
     os.remove(f'{GIT_DIR}/{ref}')
 
 
-# Given ref name, return oid
+# Given ref name, return ref, oid it points to
 def _get_ref_internal(ref, deref):
     ref_path = f'{GIT_DIR}/{ref}'
     value = None

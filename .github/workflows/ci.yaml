@@ -33,7 +33,7 @@ jobs:
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
-        run: uv pip install . --system
+        run: uv pip install . --system --extra dev
 
       - name: Run tests
         run: pytest
